@@ -1,5 +1,10 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { User } from 'src/user/entities/user.entity';
 import { CreateGenreDto } from './dto/create-genre.dto';
 import { UpdateGenreDto } from './dto/update-genre.dto';
 
@@ -7,7 +12,12 @@ import { UpdateGenreDto } from './dto/update-genre.dto';
 export class GenreService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async create(createGenreDto: CreateGenreDto) {
+  async create(user: User, createGenreDto: CreateGenreDto) {
+    if (!user.isAdmin) {
+      throw new UnauthorizedException(
+        'Usuario deve ser Admin para criar um genero',
+      );
+    }
     const genre = await this.prisma.genre.findUnique({
       where: {
         name: createGenreDto.name,

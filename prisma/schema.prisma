@@ -10,11 +10,55 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Genre{
+model Genre {
+  id        String      @id @default(uuid())
+  name      String      @unique
+  games     GameGenre[]
+  createdAt DateTime    @default(now()) @map("created_at")
+  updatedAt DateTime    @updatedAt @map("updated_at")
+
+  @@map("genre")
+}
+
+model User {
   id        String   @id @default(uuid())
-  name      String   @unique
+  name      String
+  email     String   @unique
+  password  String
+  cpf       String   @unique
+  isAdmin   Boolean  @default(false) @map("is_admin")
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  @@map("genre")
+  @@map("user")
+}
+
+model Game {
+  id          String      @id @default(uuid())
+  title       String      @unique
+  urlImage    String      @map("url_image")
+  description String
+  ImdbScore   String      @map("imdb_score")
+  year        String
+  urlTrailer  String      @map("url_trailer")
+  urlGameplay String      @map("url_gameplay")
+  genres      GameGenre[]
+  createdAt   DateTime    @default(now()) @map("created_at")
+  updatedAt   DateTime    @updatedAt @map("updated_at")
+
+  @@map("game")
+}
+
+model GameGenre {
+  id String @id @default(uuid())
+
+  Genre   Genre  @relation(fields: [genreId], references: [id])
+  genreId String @map("genre_id")
+  Game    Game   @relation(fields: [gameId], references: [id])
+  gameId  String @map("game_id")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("game_to_genre")
 }
